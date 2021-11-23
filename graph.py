@@ -26,7 +26,7 @@ class Graph():
     # == override ==
     # ====================
     def neighbors(self, id: Location) -> list[Location]: pass
-    pass
+    def cost(self, from_id: Location, to_id: Location) -> float: pass
 
 
 ##############################
@@ -56,24 +56,28 @@ class SquareGridGraph(Graph):
     ### Constructor
     #########################
     def __init__(self, width: int, height: int, map: list):
-        self.width = width
-        self.height = height
-        self.walls: list[GridLocation] = self.extract_walls(map)
+        self._width = width
+        self._height = height
+        self._walls: list[GridLocation] = self.extract_walls(map)
+        self._weights: dict[GridLocation, float] = {}
 
     def in_bounds(self, id: GridLocation) -> bool:
         (x, y) = id
-        return 0 <= x < self.width and 0 <= y < self.height
+        return 0 <= x < self._width and 0 <= y < self._height
 
     def passable(self, id: GridLocation) -> bool:
-        return id not in self.walls
+        return id not in self._walls
 
     def extract_walls(self, map) -> list[GridLocation]:
         walls: list[GridLocation] = []
-        for i in range(self.width):
-            for j in range(self.height):
+        for i in range(self._width):
+            for j in range(self._height):
                 if map[i][j] == -1:  # obstacle
                     walls.append((j, i))
         return walls
+
+    def cost(self, from_node: GridLocation, to_node: GridLocation) -> float:
+        return self._weights.get(to_node, 1)
 
     # ====================
     # == override ==
