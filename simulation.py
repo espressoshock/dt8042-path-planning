@@ -21,6 +21,7 @@ class Simulation():
     #########################
     def __init__(self, search: Search = SearchBFS):
         self._2dmap: list = []
+        self._2dmap_solved: list = []
         self._search: Search = search
         self._graph: SquareGridGraph = None
         self._start = None
@@ -51,12 +52,27 @@ class Simulation():
         self._start, self._goal = Simulation.extract_start_pos(
             map), Simulation.extract_goal_pos(map)
 
+    
+    # ==============================
+    # == 3. Extract expanded node ==
+    # ==============================
+    def merge_expanded_nodes(self, cost_map: dict):
+        for cx in cost_map.keys():
+            if cx != self._start and cx != self._goal and cx != (0,0):
+                x, y = cx[0], cx[1]
+                self._2dmap[y][x] = cost_map[cx]
+        print('final map', self._2dmap[0:5])
+        
+
+
     # =======================
-    # == 1. Perform search ==
+    # == 4. Perform search ==
     # =======================
     def start(self):
-        res = self._search.search(self._graph, self._start, self._goal)
-        Simulation.plot_map(self._2dmap, res, 'Result')
+        path, costs = self._search.search(self._graph, self._start, self._goal)
+        self.merge_expanded_nodes(costs)
+        Simulation.plot_map(self._2dmap, path, 'Result')
+
 
     #########################
     ### Built-in Test
