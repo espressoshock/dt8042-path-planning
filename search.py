@@ -14,5 +14,11 @@ class Search():
     # ====================
     # == override ==
     # ====================
+    def cost_function(self) -> None:
+        pass
+
+    # ====================
+    # == override ==
+    # ====================
     def search(self) -> None:
         pass

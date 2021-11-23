@@ -19,7 +19,15 @@ class SearchBFS(Search):
     #########################
     def __init__(self):
         super().__init__()
+        self._prev_cost = 0
         pass
+
+    # ====================
+    # == override ==
+    # ====================
+    def cost_function(self, cell) -> float:
+        self._prev_cost += 5
+        return self._prev_cost
 
     # ====================
     # == override ==
@@ -30,6 +38,9 @@ class SearchBFS(Search):
         came_from: dict[Location, Optional[Location]] = {}
         came_from[start] = None
 
+        # costs
+        costs: dict[Location, float] = {}
+
         while not frontier.empty():
             current: Location = frontier.get()
             # if reached goal state, exit
@@ -38,10 +49,12 @@ class SearchBFS(Search):
                 break
             for next in graph.neighbors(current):
                 if next not in came_from:
+                    # compute cost
+                    costs[next] = self.cost_function(current)
                     frontier.put(next)
                     came_from[next] = current
 
-        return self.extract_sssp(came_from, start, goal)
+        return self.extract_sssp(came_from, start, goal), costs
 
     # ===========
     # == Utils ==
@@ -52,7 +65,6 @@ class SearchBFS(Search):
         while current != start:
             path.append(current)
             current = came_from[current]
-        path.append(start) # optional
-        path.reverse() # optional
+        path.append(start)  # optional
+        path.reverse()  # optional
         return path
-
