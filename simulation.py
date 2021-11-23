@@ -5,6 +5,9 @@
 # =Imports
 import numpy as np
 import matplotlib.pyplot as plt
+from graph import SquareGridGraph
+from search import Search
+from search_bfs import SearchBFS
 
 
 class Simulation():
@@ -16,15 +19,51 @@ class Simulation():
     #########################
     ### Constructor
     #########################
-    def __init__(self, obstacle_density: float = 0.9):
-        self._obstacle_density = obstacle_density
-        pass
+    def __init__(self, search: Search = SearchBFS):
+        self._2dmap: list = []
+        self._search: Search = search
+        self._graph: SquareGridGraph = None
+        self._start = None
+        self._goal = None
+
+    ##############################
+    ### Task 1 / Random Obstacles
+    ##############################
+
+    # =====================
+    # == 0. Generate Map ==
+    # =====================
+    def generate_random_map(self, width: int = 60, height: int = 60):
+        self._2dmap = Simulation.generate_2dmap([width, height])
+        self.generate_grid_graph(width, height, self._2dmap)
+        self.extract_start_goal(self._2dmap)
+
+    # ===========================
+    # == 1. Generate GridGraph ==
+    # ===========================
+    def generate_grid_graph(self, width: int, height: int, map: list):
+        self._graph = SquareGridGraph(width, height, map)
+
+    # ===========================
+    # == 2. Extract start/goal ==
+    # ===========================
+    def extract_start_goal(self, map: list):
+        self._start, self._goal = Simulation.extract_start_pos(
+            map), Simulation.extract_goal_pos(map)
+
+    # =======================
+    # == 1. Perform search ==
+    # =======================
+    def start(self):
+        res = self._search.search(self._graph, self._start, self._goal)
+        Simulation.plot_map(self._2dmap, res, 'Result')
 
     #########################
     ### Built-in Test
     #########################
 
     #goes through built-in provided sample
+
     @staticmethod
     def test():
         # create a map with obstacles randomly distributed
@@ -68,6 +107,25 @@ class Simulation():
     #########################
     ### Helpers / Provided
     #########################
+
+    # ========================
+    # == Feature extraction ==
+    # ========================
+    @staticmethod
+    def extract_start_pos(map: list) -> tuple[int, int]:
+        for i in range(len(map)):
+            for j in range(len(map)):
+                if map[i][j] == -2:  # obstacle
+                    return (j, i)
+        return (0, 0)
+
+    @staticmethod
+    def extract_goal_pos(map: list) -> tuple[int, int]:
+        for i in range(len(map)):
+            for j in range(len(map)):
+                if map[i][j] == -3:  # obstacle
+                    return (j, i)
+        return (0, 0)
 
     # ====================
     # == Map Generation ==
@@ -176,9 +234,13 @@ class Simulation():
     # ====================
     # == Map Plotting ==
     # ====================
+    @staticmethod
+    def display_plot(plot):
+        plt.clf()
+        plt.imshow(plot)
+        plt.show()
 
     # helper function for plotting the result
-
     @staticmethod
     def plot_map(map2d_, path_, title_=''):
         '''Plots a map (image) of a 2d matrix with a path from start point to the goal point. 
@@ -215,7 +277,7 @@ class Simulation():
 
         colorsMap2d[locStart[0][0]][locStart[1]
                                     [0]] = [.0, .0, .0, 1.0]  # black
-        colorsMap2d[locEnd[0][0]][locEnd[1][0]] = [.0, .0, .0, .0]  # white
+        colorsMap2d[locEnd[0][0]][locEnd[1][0]] = [.0, 1, .0, 1.0]  # green
 
         # Assign RGB Val for obstacle
         locObstacle = np.where(map2d_ == -1)
@@ -243,7 +305,8 @@ class Simulation():
                 if colorsMap2d[irow][icol] == []:
                     colorsMap2d[irow][icol] = [1.0, 0.0, 0.0, 1.0]
 
-        path = path_.T.tolist()
+        print('path: ', path_)
+        path = np.array(list(path_)).T.tolist()
 
         plt.figure()
         plt.title(title_)
