@@ -52,27 +52,27 @@ class Simulation():
         self._start, self._goal = Simulation.extract_start_pos(
             map), Simulation.extract_goal_pos(map)
 
-    
     # ==============================
     # == 3. Extract expanded node ==
     # ==============================
-    def merge_expanded_nodes(self, cost_map: dict):
-        for cx in cost_map.keys():
-            if cx != self._start and cx != self._goal and cx != (0,0):
-                x, y = cx[0], cx[1]
-                self._2dmap[y][x] = cost_map[cx]
-        print('final map', self._2dmap[0:5])
-        
 
+    def merge_expanded_nodes(self, cost_map: dict):
+        self._2dmap_solved = self._2dmap[:]
+        for cx in cost_map.keys():
+            if cx != self._start and cx != self._goal and cx != (0, 0):
+                x, y = cx[0], cx[1]
+                self._2dmap_solved[y][x] = cost_map[cx]
+        print('final map', self._2dmap[0:5])
 
     # =======================
     # == 4. Perform search ==
     # =======================
+
     def start(self):
         path, costs = self._search.search(self._graph, self._start, self._goal)
         self.merge_expanded_nodes(costs)
-        Simulation.plot_map(self._2dmap, path, 'Result')
-
+        Simulation.plot_map(self._2dmap_solved, path, '' +
+                            self._search.__class__.__name__)
 
     #########################
     ### Built-in Test
@@ -292,14 +292,14 @@ class Simulation():
         locStart, locEnd = np.where(map2d_ == -2), np.where(map2d_ == -3)
 
         colorsMap2d[locStart[0][0]][locStart[1]
-                                    [0]] = [.0, .0, .0, 1.0]  # black
-        colorsMap2d[locEnd[0][0]][locEnd[1][0]] = [.0, 1, .0, 1.0]  # green
+                                    [0]] = [.0, 1, .0, 1.0]  # green
+        colorsMap2d[locEnd[0][0]][locEnd[1][0]] = [1.0, .7, .27, 1.0]  # yellow
 
         # Assign RGB Val for obstacle
         locObstacle = np.where(map2d_ == -1)
         for iposObstacle in range(len(locObstacle[0])):
             colorsMap2d[locObstacle[0][iposObstacle]
-                        ][locObstacle[1][iposObstacle]] = [1.0, .0, .0, 1.0]
+                        ][locObstacle[1][iposObstacle]] = [1.0, .0, .0, 1.0]  # red
         # Assign 0
         locZero = np.where(map2d_ == 0)
 
