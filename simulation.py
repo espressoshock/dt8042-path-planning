@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from graph import SquareGridGraph
 from search import Search
 from search_bfs import SearchBFS
+from colorama import Fore, Back, Style, init
 
 
 class Simulation():
@@ -26,6 +27,7 @@ class Simulation():
         self._graph: SquareGridGraph = None
         self._start = None
         self._goal = None
+        init()  # init colorama
 
     ##############################
     ### Task 1 / Random Obstacles
@@ -62,7 +64,21 @@ class Simulation():
             if cx != self._start and cx != self._goal and cx != (0, 0):
                 x, y = cx[0], cx[1]
                 self._2dmap_solved[y][x] = cost_map[cx]
-        print('final map', self._2dmap[0:5])
+
+    # ============================
+    # == 4. Generate Statistics ==
+    # ============================
+    def generate_statistics(self, path: list, costs: list, output: bool = False):
+        if output:
+            print(f'{Back.YELLOW}{Fore.BLACK} Statistics {Back.WHITE}{Fore.BLACK} {self._search.__class__.__name__} {Style.RESET_ALL}')
+            print(
+                f'{" "*2}{Back.CYAN} Nodes expanded {Back.GREEN} {Fore.BLACK}{len(costs)} {Style.RESET_ALL}')
+            print(
+                f'{" "*2}{Back.BLUE} Path length {Back.GREEN}{Fore.BLACK} {len(path)} {Style.RESET_ALL}')
+            print(
+                f'{" "*2}{Back.MAGENTA} Path cost {Back.GREEN} {Fore.BLACK}{costs[self._goal]} {Style.RESET_ALL}')
+        #nodes opened, path length and path cost
+        return (len(costs), len(path), costs[self._goal])
 
     # =======================
     # == 4. Perform search ==
@@ -70,9 +86,15 @@ class Simulation():
 
     def start(self):
         path, costs = self._search.search(self._graph, self._start, self._goal)
+        self.generate_statistics(path, costs, True)
         self.merge_expanded_nodes(costs)
-        Simulation.plot_map(self._2dmap_solved, path, '' +
-                            self._search.__class__.__name__)
+        figure, ax = Simulation.plot_map(self._2dmap_solved, path, '' +
+                                         self._search.__class__.__name__)
+        ax.annotate('', xy=self._start, xytext=(
+            self._start[0], self._start[1]-3), fontsize=12, arrowprops=dict(facecolor='lawngreen', arrowstyle='simple'))
+        ax.annotate('', xy=self._goal, xytext=(
+            self._goal[0], self._goal[1]-3), fontsize=12, arrowprops=dict(facecolor='gold', arrowstyle='simple'))
+        plt.show()
 
     #########################
     ### Built-in Test
@@ -256,6 +278,10 @@ class Simulation():
         plt.imshow(plot)
         plt.show()
 
+    @staticmethod
+    def show():
+        plt.show()
+
     # helper function for plotting the result
     @staticmethod
     def plot_map(map2d_, path_, title_=''):
@@ -321,12 +347,14 @@ class Simulation():
                 if colorsMap2d[irow][icol] == []:
                     colorsMap2d[irow][icol] = [1.0, 0.0, 0.0, 1.0]
 
-        print('path: ', path_)
+        # print('path: ', path_)
         path = np.array(list(path_)).T.tolist()
 
-        plt.figure()
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
         plt.title(title_)
         plt.imshow(colorsMap2d, interpolation='nearest')
         plt.colorbar()
         plt.plot(path[:][0], path[:][1], color='magenta', linewidth=2.5)
-        plt.show()
+        # plt.show()
+        return fig, ax

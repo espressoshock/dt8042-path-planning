@@ -58,8 +58,7 @@ class SquareGridGraph(Graph):
     def __init__(self, width: int, height: int, map: list):
         self._width = width
         self._height = height
-        self._walls: list[GridLocation] = self.extract_walls(map)
-        self._weights: dict[GridLocation, float] = {}
+        self._walls, self._weights = self.extract_walls_and_costs(map)
 
     def in_bounds(self, id: GridLocation) -> bool:
         (x, y) = id
@@ -68,13 +67,18 @@ class SquareGridGraph(Graph):
     def passable(self, id: GridLocation) -> bool:
         return id not in self._walls
 
-    def extract_walls(self, map) -> list[GridLocation]:
+    #  tuple(list[GridLocation], dict[GridLocation, float]):
+    def extract_walls_and_costs(self, map) -> tuple[list, dict]:
         walls: list[GridLocation] = []
+        weights: dict[GridLocation, float] = {}
         for i in range(self._width):
             for j in range(self._height):
                 if map[i][j] == -1:  # obstacle
                     walls.append((j, i))
-        return walls
+                if map[i][j] > 0:
+                    weights[(j, i)] = map[i][j]
+        return walls, weights
+
 
     def cost(self, from_node: GridLocation, to_node: GridLocation) -> float:
         return self._weights.get(to_node, 1)
