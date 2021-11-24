@@ -81,7 +81,7 @@ class Simulation():
         return (len(costs), len(path), costs[self._goal])
 
     # =======================
-    # == 4. Perform search ==
+    # == 5. Perform search ==
     # =======================
 
     def start(self):
@@ -95,6 +95,11 @@ class Simulation():
         ax.annotate('', xy=self._goal, xytext=(
             self._goal[0], self._goal[1]-3), fontsize=12, arrowprops=dict(facecolor='gold', arrowstyle='simple'))
         plt.show()
+
+
+
+
+
 
     #########################
     ### Built-in Test

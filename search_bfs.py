@@ -25,9 +25,8 @@ class SearchBFS(Search):
     # ====================
     # == override ==
     # ====================
-    def cost_function(self, cell) -> float:
-        self._prev_cost += 5
-        return self._prev_cost
+    def cost_function(self, graph, from_cell, to_cell) -> float:
+        return graph.cost(from_cell, to_cell)
 
     # ====================
     # == override ==
@@ -40,17 +39,19 @@ class SearchBFS(Search):
 
         # costs
         costs: dict[Location, float] = {}
+        costs[start] = 0
 
         while not frontier.empty():
             current: Location = frontier.get()
             # if reached goal state, exit
             if current == goal:
-                print('current', current)
                 break
             for next in graph.neighbors(current):
+                cost = costs[current] + \
+                    self.cost_function(graph, current, next)
                 if next not in came_from:
                     # compute cost
-                    costs[next] = self.cost_function(current)
+                    costs[next] = cost
                     frontier.put(next)
                     came_from[next] = current
 
