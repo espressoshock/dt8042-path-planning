@@ -9,6 +9,7 @@ from graph import SquareGridGraph
 from search import Search
 from search_bfs import SearchBFS
 from colorama import Fore, Back, Style, init
+import copy
 
 
 class Simulation():
@@ -59,7 +60,7 @@ class Simulation():
     # ==============================
 
     def merge_expanded_nodes(self, cost_map: dict):
-        self._2dmap_solved = self._2dmap[:]
+        self._2dmap_solved = copy.deepcopy(self._2dmap)
         for cx in cost_map.keys():
             if cx != self._start and cx != self._goal and cx != (0, 0):
                 x, y = cx[0], cx[1]
@@ -95,11 +96,7 @@ class Simulation():
         ax.annotate('', xy=self._goal, xytext=(
             self._goal[0], self._goal[1]-3), fontsize=12, arrowprops=dict(facecolor='gold', arrowstyle='simple'))
         plt.show()
-
-
-
-
-
+        self.clear_map()
 
     #########################
     ### Built-in Test
@@ -170,9 +167,17 @@ class Simulation():
                     return (j, i)
         return (0, 0)
 
+    # =================
+    # == Search swap ==
+    # =================
+    def change_search(self, search: Search):
+        self._search = search
+
     # ====================
     # == Map Generation ==
     # ====================
+    def clear_map(self):
+        self._2dmap_solved = []
 
     @staticmethod
     def generate_2dmap(size_):
