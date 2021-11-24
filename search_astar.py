@@ -22,6 +22,8 @@ class SearchAStar(Search):
         super().__init__()
         self._manhattan_heuristic: bool = manhattan_heuristic
         self._d = d
+        if manhattan_heuristic: self.__class__.__name__ = self.__class__.__name__ + ' | Manhattan Heuristic'
+        else: self.__class__.__name__ = 'SearchAStar | Euclidean Heuristic'
         pass
 
     # ===============

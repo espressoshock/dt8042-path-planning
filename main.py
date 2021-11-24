@@ -19,24 +19,29 @@ import random
 
 def start_task1a(n_tests: int = 3, size_base: int = 40, size_d: int = 20):
     for _ in range(n_tests):
-        print(f'{Back.RED}{Fore.BLACK} Uninformed Search {Back.WHITE} {Style.RESET_ALL}\n')
+        print(
+            f'{Back.RED}{Fore.BLACK} Uninformed Search {Back.WHITE} {Style.RESET_ALL}\n')
         #random
         sim = Simulation(SearchRandom())
         size = random.randint(size_base, size_base+size_d)
         sim.generate_random_map(width=size, height=size)
         sim.start()
         #bfs
-        sim._search = SearchBFS()
+        sim.change_search(SearchBFS())
         sim.start()
         #dfs
-        sim._search = SearchDFS()
+        sim.change_search(SearchDFS())
         sim.start()
-        print(f'\n\n{Back.RED}{Fore.BLACK} Informed Search {Back.WHITE} {Style.RESET_ALL}\n')
+        print(
+            f'\n\n{Back.RED}{Fore.BLACK} Informed Search {Back.WHITE} {Style.RESET_ALL}\n')
         #greedy
-        sim._search = SearchGreedy()
+        sim.change_search(SearchGreedy())
         sim.start()
-        #A*
-        sim._search = SearchAStar()
+        #A* / Manhattan heuristic
+        sim.change_search(SearchAStar(manhattan_heuristic=True))
+        sim.start()
+        #A* / Euclidean heuristic
+        sim.change_search(SearchAStar(manhattan_heuristic=False))
         sim.start()
 
 
