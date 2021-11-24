@@ -3,36 +3,46 @@
 ##############################
 
 # =Imports
-from matplotlib import pyplot as plt
-import numpy as np
-from search import Search
+from search_random import SearchRandom
 from search_bfs import SearchBFS
+from search_dfs import SearchDFS
+from search_greedy import SearchGreedy
+from search_astar import SearchAStar
 from simulation import Simulation
-from graph import Graph, SimpleGraph, SquareGridGraph
+from colorama import Fore, Back, Style, init
+import random
+
+# ===========================
+# == Compound Task 1(A) ==
+# ===========================
+
+
+def start_task1a(n_tests: int = 3, size_base: int = 40, size_d: int = 20):
+    for _ in range(n_tests):
+        print(f'{Back.RED}{Fore.BLACK} Uninformed Search {Back.WHITE} {Style.RESET_ALL}\n')
+        #random
+        sim = Simulation(SearchRandom())
+        size = random.randint(size_base, size_base+size_d)
+        sim.generate_random_map(width=size, height=size)
+        sim.start()
+        #bfs
+        sim._search = SearchBFS()
+        sim.start()
+        #dfs
+        sim._search = SearchDFS()
+        sim.start()
+        print(f'\n\n{Back.RED}{Fore.BLACK} Informed Search {Back.WHITE} {Style.RESET_ALL}\n')
+        #greedy
+        sim._search = SearchGreedy()
+        sim.start()
+        #A*
+        sim._search = SearchAStar()
+        sim.start()
 
 
 def main():
-    '''
-    # TESTING
-
-    map = Simulation.generate_2dmap([60, 60])
-    bfs = SearchBFS()
-    start = Simulation.extract_start_pos(map)
-    goal = Simulation.extract_goal_pos(map)
-    #print(map)
-    sq = SquareGridGraph(len(map), len(map), map)
-    bfsres = bfs.search(sq, start, goal)
-    #print(sq.walls)
-    #Simulation.display_plot(map)
-    #print('goal: ', goal)
-    #Simulation.plot_map(map, bfsres, 'Result')
-    #Simulation.test()
-    '''
-    search = SearchBFS()
-
-    sim = Simulation(search)
-    sim.generate_random_map()
-    sim.start()
+    init()  # init colorama
+    start_task1a(n_tests=1)
 
 
 if __name__ == '__main__':
