@@ -4,6 +4,7 @@
 
 # =Imports
 import collections
+import random
 
 # Implementation following
 # suggested literature
@@ -30,3 +31,8 @@ class Queue:
 
     def get(self) -> any:
         return self.elements.popleft()
+
+    def get_random(self) -> any:
+        el = random.sample(self.elements, 1)[0]
+        self.elements.remove(el)
+        return el
