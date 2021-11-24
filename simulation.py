@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from graph import SquareGridGraph
 from search import Search
 from search_bfs import SearchBFS
+from colorama import Fore, Back, Style, init
 
 
 class Simulation():
@@ -26,6 +27,7 @@ class Simulation():
         self._graph: SquareGridGraph = None
         self._start = None
         self._goal = None
+        init()  # init colorama
 
     ##############################
     ### Task 1 / Random Obstacles
@@ -64,12 +66,28 @@ class Simulation():
                 self._2dmap_solved[y][x] = cost_map[cx]
         print('final map', self._2dmap[0:5])
 
+    # ============================
+    # == 4. Generate Statistics ==
+    # ============================
+    def generate_statistics(self, path: list, costs: list, output: bool = False):
+        if output:
+            print(f'{Back.YELLOW}{Fore.BLACK} Statistics {Back.WHITE}{Fore.BLACK} {self._search.__class__.__name__} {Style.RESET_ALL}')
+            print(
+                f'{" "*2}{Back.CYAN} Nodes expanded {Back.GREEN} {Fore.BLACK}{len(costs)} {Style.RESET_ALL}')
+            print(
+                f'{" "*2}{Back.BLUE} Path length {Back.GREEN}{Fore.BLACK} {len(path)} {Style.RESET_ALL}')
+            print(
+                f'{" "*2}{Back.MAGENTA} Path cost {Back.GREEN} {Fore.BLACK}{costs[self._goal]} {Style.RESET_ALL}')
+        #nodes opened, path length and path cost
+        return (len(costs), len(path), costs[self._goal])
+
     # =======================
     # == 4. Perform search ==
     # =======================
 
     def start(self):
         path, costs = self._search.search(self._graph, self._start, self._goal)
+        self.generate_statistics(path, costs, True)
         self.merge_expanded_nodes(costs)
         Simulation.plot_map(self._2dmap_solved, path, '' +
                             self._search.__class__.__name__)
