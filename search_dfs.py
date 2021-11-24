@@ -35,7 +35,7 @@ class SearchDFS(Search):
     # ====================
     def search(self, graph: Graph, start: Location, goal: Location) -> dict[Location, Optional[Location]]:
         frontier = Stack()
-        frontier.put(start)
+        frontier.push(start)
         came_from: dict[Location, Optional[Location]] = {}
         came_from[start] = None
 
@@ -43,16 +43,15 @@ class SearchDFS(Search):
         costs: dict[Location, float] = {}
 
         while not frontier.empty():
-            current: Location = frontier.get()
+            current: Location = frontier.pop()
             # if reached goal state, exit
             if current == goal:
-                print('current', current)
                 break
             for next in graph.neighbors(current):
                 if next not in came_from:
                     # compute cost
                     costs[next] = self.cost_function(current)
-                    frontier.put(next)
+                    frontier.push(next)
                     came_from[next] = current
 
         return self.extract_sssp(came_from, start, goal), costs
