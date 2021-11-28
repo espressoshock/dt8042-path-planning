@@ -8,6 +8,7 @@ from typing import Dict, Optional
 from graph import *
 from search import Search
 import math
+from enum import Enum
 
 # Implementation following
 # suggested literature
@@ -15,16 +16,39 @@ import math
 
 
 class SearchAStar(Search):
+
+    #########################
+    ### Heuristics enum
+    #########################
+    class Heuristics(Enum):
+        MANHATTAN = 0,
+        EUCLIDEAN = 1,
+        CUSTOM_1 = 2,
+        CUSTOM_2 = 3
+
     #########################
     ### Constructor
     #########################
-    def __init__(self, manhattan_heuristic: bool = True, d: float = 1):
+    def __init__(self, heuristic: Heuristics = Heuristics.MANHATTAN, d: float = 1):
         super().__init__()
-        self._manhattan_heuristic: bool = manhattan_heuristic
+        self._heuristic = heuristic
         self._d = d
-        if manhattan_heuristic: self.__class__.__name__ = self.__class__.__name__ + ' | Manhattan Heuristic'
-        else: self.__class__.__name__ = 'SearchAStar | Euclidean Heuristic'
         pass
+
+    # ====================
+    # == override ==
+    # ====================
+    def __str__(self):
+        base = 'SearchA*'
+        if self._heuristic is self.Heuristics.EUCLIDEAN:
+            base += ' [Heuristic: Euclidean]'
+        elif self._heuristic is self.Heuristics.CUSTOM_1:
+            base += ' [Heuristic: Custom 1]'
+        elif self._heuristic is self.Heuristics.CUSTOM_2:
+            base += ' [Heuristic: Custom 2]'
+        else:
+            base += ' [Heuristic: Manhattan]'
+        return base
 
     # ===============
     # == heuristic ==
@@ -44,10 +68,15 @@ class SearchAStar(Search):
         return self._d * math.sqrt(dx * dx + dy * dy)
 
     def heuristic(self, a: GridLocation, b: GridLocation) -> float:
-        if self._manhattan_heuristic:
+        if self._heuristic is self.Heuristics.EUCLIDEAN:
+            # you shouldn't be using this on a grid with 4-way movements
+            return self._heuristic_euclidean(a, b)
+        elif self._heuristic is self.Heuristics.CUSTOM_1:
+            pass
+        elif self._heuristic is self.Heuristics.CUSTOM_2:
+            pass
+        else:
             return self._heuristic_manhattan(a, b)
-        # you should be using this on a grid with 4-way movements
-        return self._heuristic_euclidean(a, b)
 
     # ==============
     # == override ==

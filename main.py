@@ -38,16 +38,26 @@ def start_task1a(n_tests: int = 3, size_base: int = 40, size_d: int = 20):
         sim.change_search(SearchGreedy())
         sim.start()
         #A* / Manhattan heuristic
-        sim.change_search(SearchAStar(manhattan_heuristic=True))
+        sim.change_search(SearchAStar(heuristic=SearchAStar.Heuristics.MANHATTAN))
         sim.start()
         #A* / Euclidean heuristic
-        sim.change_search(SearchAStar(manhattan_heuristic=False))
+        sim.change_search(SearchAStar(heuristic=SearchAStar.Heuristics.EUCLIDEAN))
         sim.start()
 
 
 def main():
     init()  # init colorama
     start_task1a(n_tests=1)
+    # sim = Simulation(SearchRandom())
+    # sim.generate_random_map()
+    # sim.start() 
+
+    # sim = Simulation(SearchAStar(manhattan_heuristic=True, d=50))
+    # sim.generate_random_map_obstacles()
+    # sim.start()
+    # sim.change_search(SearchAStar(manhattan_heuristic=True, d=1))
+    # sim.start()
+
 
 
 if __name__ == '__main__':
