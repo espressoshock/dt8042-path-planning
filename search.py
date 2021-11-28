@@ -22,3 +22,10 @@ class Search():
     # ====================
     def search(self) -> None:
         pass
+
+    # ====================
+    # == override ==
+    # ====================
+    def __str__(self):
+        return self.__class__.__name__
+        pass

@@ -42,6 +42,11 @@ class Simulation():
         self.generate_grid_graph(width, height, self._2dmap)
         self.extract_start_goal(self._2dmap)
 
+    def generate_random_map_obstacles(self, width: int = 60, height: int = 60):
+        self._2dmap = Simulation.generate_2dmap_obstacles([width, height])[0]
+        self.generate_grid_graph(width, height, self._2dmap)
+        self.extract_start_goal(self._2dmap)
+
     # ===========================
     # == 1. Generate GridGraph ==
     # ===========================
@@ -84,18 +89,17 @@ class Simulation():
     # =======================
     # == 5. Perform search ==
     # =======================
-
     def start(self):
         path, costs = self._search.search(self._graph, self._start, self._goal)
         self.generate_statistics(path, costs, True)
         self.merge_expanded_nodes(costs)
         figure, ax = Simulation.plot_map(self._2dmap_solved, path, '' +
-                                         self._search.__class__.__name__)
+                                         str(self._search))
         ax.annotate('', xy=self._start, xytext=(
             self._start[0], self._start[1]-3), fontsize=12, arrowprops=dict(facecolor='lawngreen', arrowstyle='simple'))
         ax.annotate('', xy=self._goal, xytext=(
             self._goal[0], self._goal[1]-3), fontsize=12, arrowprops=dict(facecolor='gold', arrowstyle='simple'))
-        plt.show()
+        self.show()
         self.clear_map()
 
     #########################
