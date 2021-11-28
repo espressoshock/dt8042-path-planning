@@ -1,5 +1,5 @@
 ##############################
-### Simulation class
+# Simulation class
 ##############################
 
 # =Imports
@@ -10,28 +10,35 @@ from search import Search
 from search_bfs import SearchBFS
 from colorama import Fore, Back, Style, init
 import copy
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 class Simulation():
     #########################
-    ### SIM-CONSTANTS
+    # SIM-CONSTANTS
     #########################
     OBSTACLE_DENSITY = 0.9
 
     #########################
-    ### Constructor
+    # Constructor
     #########################
-    def __init__(self, search: Search = SearchBFS):
+    def __init__(self, search: Search = SearchBFS, n_plots: tuple[int, int] = [6, 1]):
         self._2dmap: list = []
         self._2dmap_solved: list = []
         self._search: Search = search
         self._graph: SquareGridGraph = None
         self._start = None
         self._goal = None
+        self._fig, self._axs = plt.subplots(
+            n_plots[1], n_plots[0], figsize=(10, 5))
+        self._plot_size = n_plots
+        self._current_ax_h = 0
+        self._current_ax_v = 0
+
         init()  # init colorama
 
     ##############################
-    ### Task 1 / Random Obstacles
+    # Task 1 / Random Obstacles
     ##############################
 
     # =====================
@@ -76,37 +83,39 @@ class Simulation():
     # ============================
     def generate_statistics(self, path: list, costs: list, output: bool = False):
         if output:
-            print(f'{Back.YELLOW}{Fore.BLACK} Statistics {Back.WHITE}{Fore.BLACK} {self._search.__class__.__name__} {Style.RESET_ALL}')
+            print(f'{Back.YELLOW}{Fore.BLACK} Statistics {Back.WHITE}{Fore.BLACK} {self._search} {Style.RESET_ALL}')
             print(
                 f'{" "*2}{Back.CYAN} Nodes expanded {Back.GREEN} {Fore.BLACK}{len(costs)} {Style.RESET_ALL}')
             print(
                 f'{" "*2}{Back.BLUE} Path length {Back.GREEN}{Fore.BLACK} {len(path)} {Style.RESET_ALL}')
             print(
                 f'{" "*2}{Back.MAGENTA} Path cost {Back.GREEN} {Fore.BLACK}{costs[self._goal]} {Style.RESET_ALL}')
-        #nodes opened, path length and path cost
+        # nodes opened, path length and path cost
         return (len(costs), len(path), costs[self._goal])
 
     # =======================
     # == 5. Perform search ==
     # =======================
-    def start(self):
+    def start(self, plot_in: tuple[int, int] = None):
+        if plot_in is None:
+            plot_in = (self._current_ax_h, self._current_ax_h)
         path, costs = self._search.search(self._graph, self._start, self._goal)
         self.generate_statistics(path, costs, True)
         self.merge_expanded_nodes(costs)
-        figure, ax = Simulation.plot_map(self._2dmap_solved, path, '' +
-                                         str(self._search))
-        ax.annotate('', xy=self._start, xytext=(
-            self._start[0], self._start[1]-3), fontsize=12, arrowprops=dict(facecolor='lawngreen', arrowstyle='simple'))
-        ax.annotate('', xy=self._goal, xytext=(
-            self._goal[0], self._goal[1]-3), fontsize=12, arrowprops=dict(facecolor='gold', arrowstyle='simple'))
-        self.show()
+        figure, ax = self.plot_map(self._2dmap_solved, path, title_=('' +
+                                   str(self._search)), plot_in=plot_in)
+        # ax.annotate('', xy=self._start, xytext=(
+        #     self._start[0], self._start[1]-3), fontsize=12, arrowprops=dict(facecolor='lawngreen', arrowstyle='simple'))
+        # ax.annotate('', xy=self._goal, xytext=(
+        #     self._goal[0], self._goal[1]-3), fontsize=12, arrowprops=dict(facecolor='gold', arrowstyle='simple'))
+        # self.show()
         self.clear_map()
 
     #########################
-    ### Built-in Test
+    # Built-in Test
     #########################
 
-    #goes through built-in provided sample
+    # goes through built-in provided sample
 
     @staticmethod
     def test():
@@ -149,7 +158,7 @@ class Simulation():
         Simulation.plot_map(example_solved_map, example_solved_path)
 
     #########################
-    ### Helpers / Provided
+    # Helpers / Provided
     #########################
 
     # ========================
@@ -185,7 +194,7 @@ class Simulation():
 
     @staticmethod
     def generate_2dmap(size_):
-        '''Generates a random 2d map with obstacles (small blocks) randomly distributed. 
+        '''Generates a random 2d map with obstacles (small blocks) randomly distributed.
         You can specify any size of this map but your solution has to be independent of map size
 
         Parameters:
@@ -196,7 +205,7 @@ class Simulation():
         Returns:
         --------
             map2d : array-like, shape (size_[0], size_[1])
-            A 2d grid map, cells with a value of 0: Free cell; 
+            A 2d grid map, cells with a value of 0: Free cell;
                                                     -1: Obstacle;
                                                     -2: Start point;
                                                     -3: Goal point;
@@ -223,7 +232,7 @@ class Simulation():
     # Generate 2d grid map with rotated-H-shape object
     @staticmethod
     def generate_2dmap_obstacles(size_):
-        '''Generates a random 2d map with a rotated-H-shape object in the middle and obstacles (small blocks) randomly distributed. 
+        '''Generates a random 2d map with a rotated-H-shape object in the middle and obstacles (small blocks) randomly distributed.
         You can specify any size of this map but your solution has to be independent of map size
 
         Parameters:
@@ -234,16 +243,16 @@ class Simulation():
         Returns:
         --------
             map2d : array-like, shape (size_[0], size_[1])
-            A 2d grid map, cells with a value of 0: Free cell; 
+            A 2d grid map, cells with a value of 0: Free cell;
                                                 -1: Obstacle;
                                                 -2: Start point;
                                                 -3: Goal point;
-                                                
+
         [ytop, ybot, minx] : list
             information of the rotated-H-shape object
             ytop - y coordinate of the top horizontal wall/part
             ybot - y coordinate of the bottom horizontal wall/part
-            minx - X coordinate of the vertical wall 
+            minx - X coordinate of the vertical wall
         '''
 
         size_x, size_y = size_[0], size_[1]
@@ -280,27 +289,24 @@ class Simulation():
             size_x//2 + 4, size_x - 3), np.random.random_integers(ybot+1, ytop-1)]
 
         map2d[goalp[1], goalp[0]] = -3
-        #return map2d, [startp[1], startp[0]], [goalp[1], goalp[0]], [ytop, ybot]
+        # return map2d, [startp[1], startp[0]], [goalp[1], goalp[0]], [ytop, ybot]
         return map2d, [ytop, ybot, minx]
 
     # ====================
     # == Map Plotting ==
     # ====================
-    @staticmethod
-    def display_plot(plot):
+    def display_plot(self, plot):
         plt.clf()
         plt.imshow(plot)
         plt.show()
 
-    @staticmethod
-    def show():
+    def show(self):
         plt.show()
 
     # helper function for plotting the result
-    @staticmethod
-    def plot_map(map2d_, path_, title_=''):
-        '''Plots a map (image) of a 2d matrix with a path from start point to the goal point. 
-            cells with a value of 0: Free cell; 
+    def plot_map(self, map2d_, path_, plot_in: tuple[int, int], title_=''):
+        '''Plots a map (image) of a 2d matrix with a path from start point to the goal point.
+            cells with a value of 0: Free cell;
                                 -1: Obstacle;
                                 -2: Start point;
                                 -3: Goal point;
@@ -308,10 +314,10 @@ class Simulation():
         -----------
         map2d_ : array-like
             an array with Real Numbers
-            
+
         path_ : array-like
             an array of 2d corrdinates (of the path) in the format of [[x0, y0], [x1, y1], [x2, y2], ..., [x_end, y_end]]
-            
+
         title_ : string
             information/description of the plot
 
@@ -364,11 +370,45 @@ class Simulation():
         # print('path: ', path_)
         path = np.array(list(path_)).T.tolist()
 
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        plt.title(title_)
-        plt.imshow(colorsMap2d, interpolation='nearest')
-        plt.colorbar()
-        plt.plot(path[:][0], path[:][1], color='magenta', linewidth=2.5)
-        # plt.show()
-        return fig, ax
+        # fig = plt.figure()
+        # ax = fig.add_subplot(111)
+        if self._plot_size[1] <= 1:
+            self._axs[self._current_ax_h].plot(
+                path[:][0], path[:][1], color='magenta', linewidth=2.5)
+            im = self._axs[self._current_ax_h].imshow(
+                colorsMap2d, interpolation='nearest')
+            self._axs[self._current_ax_h].title.set_text(title_)
+            divider = make_axes_locatable(self._axs[self._current_ax_h])
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            self._fig.colorbar(im, cax=cax, orientation='vertical')
+        else:
+            self._axs[self._current_ax_v, self._current_ax_h].plot(
+                path[:][0], path[:][1], color='magenta', linewidth=2.5)
+            im = self._axs[self._current_ax_v, self._current_ax_h].imshow(
+                colorsMap2d, interpolation='nearest')
+            self._axs[self._current_ax_v, self._current_ax_h].title.set_text(title_)
+            divider = make_axes_locatable(
+                self._axs[self._current_ax_v, self._current_ax_h])
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            self._fig.colorbar(im, cax=cax, orientation='vertical')
+
+        # apply tight layout
+        # self._fig.tight_layout()
+        # set the spacing between subplots
+        plt.subplots_adjust(left=0.1,
+                            bottom=0.1,
+                            right=0.9,
+                            top=0.9,
+                            wspace=0.9,
+                            hspace=0.4)
+
+        # update current axis
+        if self._current_ax_h < self._plot_size[0]-1:
+            self._current_ax_h += 1
+        else:
+            self._current_ax_h = 0
+            self._current_ax_v += 1
+
+        if self._plot_size[1] <= 1:
+            return self._fig, self._axs[self._current_ax_h-1]
+        return self._fig, self._axs[self._current_ax_v-1, self._current_ax_h-1]
