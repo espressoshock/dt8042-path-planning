@@ -23,7 +23,6 @@ class Simulation():
     # Constructor
     #########################
     def __init__(self, search: Search = SearchBFS, n_plots: tuple[int, int] = [6, 1]):
-        print('n plots', n_plots[0])
         self._2dmap: list = []
         self._2dmap_solved: list = []
         self._search: Search = search
@@ -84,7 +83,7 @@ class Simulation():
     # ============================
     def generate_statistics(self, path: list, costs: list, output: bool = False):
         if output:
-            print(f'{Back.YELLOW}{Fore.BLACK} Statistics {Back.WHITE}{Fore.BLACK} {self._search.__class__.__name__} {Style.RESET_ALL}')
+            print(f'{Back.YELLOW}{Fore.BLACK} Statistics {Back.WHITE}{Fore.BLACK} {self._search} {Style.RESET_ALL}')
             print(
                 f'{" "*2}{Back.CYAN} Nodes expanded {Back.GREEN} {Fore.BLACK}{len(costs)} {Style.RESET_ALL}')
             print(
