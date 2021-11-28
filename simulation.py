@@ -13,7 +13,6 @@ import copy
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
-
 class Simulation():
     #########################
     # SIM-CONSTANTS
@@ -24,14 +23,18 @@ class Simulation():
     # Constructor
     #########################
     def __init__(self, search: Search = SearchBFS, n_plots: tuple[int, int] = [1, 6]):
+        print('n plots', n_plots[0])
         self._2dmap: list = []
         self._2dmap_solved: list = []
         self._search: Search = search
         self._graph: SquareGridGraph = None
         self._start = None
         self._goal = None
-        self._fig, self._axs = plt.subplots(n_plots[0], n_plots[1])
-        self._current_ax = 0
+        self._fig, self._axs = plt.subplots(n_plots[1], n_plots[0])
+        self._plot_size = n_plots
+        self._current_ax_h = 0
+        self._current_ax_v = 0
+
         init()  # init colorama
 
     ##############################
@@ -93,12 +96,14 @@ class Simulation():
     # =======================
     # == 5. Perform search ==
     # =======================
-    def start(self):
+    def start(self, plot_in: tuple[int, int] = None):
+        if plot_in is None:
+            plot_in = (self._current_ax_h, self._current_ax_h)
         path, costs = self._search.search(self._graph, self._start, self._goal)
         self.generate_statistics(path, costs, True)
         self.merge_expanded_nodes(costs)
         figure, ax = self.plot_map(self._2dmap_solved, path, '' +
-                                         str(self._search))
+                                   str(self._search), plot_in)
         # ax.annotate('', xy=self._start, xytext=(
         #     self._start[0], self._start[1]-3), fontsize=12, arrowprops=dict(facecolor='lawngreen', arrowstyle='simple'))
         # ax.annotate('', xy=self._goal, xytext=(
@@ -299,7 +304,7 @@ class Simulation():
         plt.show()
 
     # helper function for plotting the result
-    def plot_map(self, map2d_, path_, title_=''):
+    def plot_map(self, map2d_, path_, plot_in: tuple[int, int], title_=''):
         '''Plots a map (image) of a 2d matrix with a path from start point to the goal point.
             cells with a value of 0: Free cell;
                                 -1: Obstacle;
@@ -367,12 +372,43 @@ class Simulation():
 
         # fig = plt.figure()
         # ax = fig.add_subplot(111)
-        self._axs[self._current_ax].plot(path[:][0], path[:][1], color='magenta', linewidth=2.5)
-        im = self._axs[self._current_ax].imshow(colorsMap2d, interpolation='nearest')
-       # self._axs[self._current_ax].colorbar()
-        #self._axs[self._current_ax].title(title_)
-        divider = make_axes_locatable(self._axs[self._current_ax])
-        cax = divider.append_axes('right', size='5%', pad=0.05)
-        self._fig.colorbar(im, cax=cax, orientation='vertical')
-        self._current_ax += 1
-        return self._fig, self._axs[self._current_ax-1]
+        if self._plot_size[1] <= 1:
+            self._axs[self._current_ax_h].plot(
+                path[:][0], path[:][1], color='magenta', linewidth=2.5)
+            im = self._axs[self._current_ax_h].imshow(
+                colorsMap2d, interpolation='nearest')
+        # self._axs[self._current_ax].colorbar()
+            #self._axs[self._current_ax].title(title_)
+            divider = make_axes_locatable(self._axs[self._current_ax_h])
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            self._fig.colorbar(im, cax=cax, orientation='vertical')
+        else:
+            self._axs[self._current_ax_v, self._current_ax_h].plot(
+                path[:][0], path[:][1], color='magenta', linewidth=2.5)
+            im = self._axs[self._current_ax_v, self._current_ax_h].imshow(
+                colorsMap2d, interpolation='nearest')
+        # self._axs[self._current_ax].colorbar()
+            #self._axs[self._current_ax].title(title_)
+            divider = make_axes_locatable(
+                self._axs[self._current_ax_v, self._current_ax_h])
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            self._fig.colorbar(im, cax=cax, orientation='vertical')
+
+        # apply tight layout
+        # self._fig.tight_layout()
+        # set the spacing between subplots
+        plt.subplots_adjust(left=0.1,
+                            bottom=0.1,
+                            right=0.9,
+                            top=0.9,
+                            wspace=0.9,
+                            hspace=0.9)
+
+        # update current axis
+        if self._current_ax_h < self._plot_size[0]:
+            self._current_ax_h += 1
+        if(self._current_ax_h >= self._plot_size[0] and self._current_ax_v < self._plot_size[1]):
+            self._current_ax_v += 1
+        if self._plot_size[1] <= 1:
+            return self._fig, self._axs[self._current_ax_h-1]
+        return self._fig, self._axs[self._current_ax_v-1, self._current_ax_h-1]
