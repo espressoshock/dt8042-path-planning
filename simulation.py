@@ -22,7 +22,7 @@ class Simulation():
     #########################
     # Constructor
     #########################
-    def __init__(self, search: Search = SearchBFS, n_plots: tuple[int, int] = [1, 6]):
+    def __init__(self, search: Search = SearchBFS, n_plots: tuple[int, int] = [6, 1]):
         print('n plots', n_plots[0])
         self._2dmap: list = []
         self._2dmap_solved: list = []
@@ -30,7 +30,8 @@ class Simulation():
         self._graph: SquareGridGraph = None
         self._start = None
         self._goal = None
-        self._fig, self._axs = plt.subplots(n_plots[1], n_plots[0])
+        self._fig, self._axs = plt.subplots(
+            n_plots[1], n_plots[0], figsize=(10, 5))
         self._plot_size = n_plots
         self._current_ax_h = 0
         self._current_ax_v = 0
@@ -102,8 +103,8 @@ class Simulation():
         path, costs = self._search.search(self._graph, self._start, self._goal)
         self.generate_statistics(path, costs, True)
         self.merge_expanded_nodes(costs)
-        figure, ax = self.plot_map(self._2dmap_solved, path, '' +
-                                   str(self._search), plot_in)
+        figure, ax = self.plot_map(self._2dmap_solved, path, title_=('' +
+                                   str(self._search)), plot_in=plot_in)
         # ax.annotate('', xy=self._start, xytext=(
         #     self._start[0], self._start[1]-3), fontsize=12, arrowprops=dict(facecolor='lawngreen', arrowstyle='simple'))
         # ax.annotate('', xy=self._goal, xytext=(
@@ -377,8 +378,7 @@ class Simulation():
                 path[:][0], path[:][1], color='magenta', linewidth=2.5)
             im = self._axs[self._current_ax_h].imshow(
                 colorsMap2d, interpolation='nearest')
-        # self._axs[self._current_ax].colorbar()
-            #self._axs[self._current_ax].title(title_)
+            self._axs[self._current_ax_h].title.set_text(title_)
             divider = make_axes_locatable(self._axs[self._current_ax_h])
             cax = divider.append_axes('right', size='5%', pad=0.05)
             self._fig.colorbar(im, cax=cax, orientation='vertical')
@@ -387,8 +387,7 @@ class Simulation():
                 path[:][0], path[:][1], color='magenta', linewidth=2.5)
             im = self._axs[self._current_ax_v, self._current_ax_h].imshow(
                 colorsMap2d, interpolation='nearest')
-        # self._axs[self._current_ax].colorbar()
-            #self._axs[self._current_ax].title(title_)
+            self._axs[self._current_ax_v, self._current_ax_h].title.set_text(title_)
             divider = make_axes_locatable(
                 self._axs[self._current_ax_v, self._current_ax_h])
             cax = divider.append_axes('right', size='5%', pad=0.05)
@@ -402,13 +401,15 @@ class Simulation():
                             right=0.9,
                             top=0.9,
                             wspace=0.9,
-                            hspace=0.9)
+                            hspace=0.4)
 
         # update current axis
-        if self._current_ax_h < self._plot_size[0]:
+        if self._current_ax_h < self._plot_size[0]-1:
             self._current_ax_h += 1
-        if(self._current_ax_h >= self._plot_size[0] and self._current_ax_v < self._plot_size[1]):
+        else:
+            self._current_ax_h = 0
             self._current_ax_v += 1
+
         if self._plot_size[1] <= 1:
             return self._fig, self._axs[self._current_ax_h-1]
         return self._fig, self._axs[self._current_ax_v-1, self._current_ax_h-1]
