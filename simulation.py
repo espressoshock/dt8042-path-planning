@@ -25,6 +25,7 @@ class Simulation():
     def __init__(self, search: Search = SearchBFS, n_plots: tuple[int, int] = [6, 1]):
         self._2dmap: list = []
         self._2dmap_solved: list = []
+        self._aux_info: list = []  # aux info provided for generate_random_map_obstacles
         self._search: Search = search
         self._graph: SquareGridGraph = None
         self._start = None
@@ -50,7 +51,8 @@ class Simulation():
         self.extract_start_goal(self._2dmap)
 
     def generate_random_map_obstacles(self, width: int = 60, height: int = 60):
-        self._2dmap = Simulation.generate_2dmap_obstacles([width, height])[0]
+        self._2dmap, self._aux_info = Simulation.generate_2dmap_obstacles([
+                                                                          width, height])
         self.generate_grid_graph(width, height, self._2dmap)
         self.extract_start_goal(self._2dmap)
 
@@ -83,7 +85,8 @@ class Simulation():
     # ============================
     def generate_statistics(self, path: list, costs: list, output: bool = False):
         if output:
-            print(f'{Back.YELLOW}{Fore.BLACK} Statistics {Back.WHITE}{Fore.BLACK} {self._search} {Style.RESET_ALL}')
+            print(
+                f'{Back.YELLOW}{Fore.BLACK} Statistics {Back.WHITE}{Fore.BLACK} {self._search} {Style.RESET_ALL}')
             print(
                 f'{" "*2}{Back.CYAN} Nodes expanded {Back.GREEN} {Fore.BLACK}{len(costs)} {Style.RESET_ALL}')
             print(
@@ -99,7 +102,13 @@ class Simulation():
     def start(self, plot_in: tuple[int, int] = None):
         if plot_in is None:
             plot_in = (self._current_ax_h, self._current_ax_h)
-        path, costs = self._search.search(self._graph, self._start, self._goal)
+
+        if len(self._aux_info) > 0:
+            path, costs = self._search.search(
+                self._graph, self._start, self._goal, self._aux_info)
+        else:
+            path, costs = self._search.search(
+                self._graph, self._start, self._goal)
         self.generate_statistics(path, costs, True)
         self.merge_expanded_nodes(costs)
         figure, ax = self.plot_map(self._2dmap_solved, path, title_=('' +
@@ -381,16 +390,28 @@ class Simulation():
             divider = make_axes_locatable(self._axs[self._current_ax_h])
             cax = divider.append_axes('right', size='5%', pad=0.05)
             self._fig.colorbar(im, cax=cax, orientation='vertical')
+            #add annotations
+            self._axs[self._current_ax_h].annotate('', xy=self._start, xytext=(
+                self._start[0], self._start[1]-3), fontsize=20, arrowprops=dict(facecolor='lawngreen', arrowstyle='simple'))
+            self._axs[self._current_ax_h].annotate('', xy=self._goal, xytext=(
+                self._goal[0], self._goal[1]-3), fontsize=20, arrowprops=dict(facecolor='gold', arrowstyle='simple'))
         else:
             self._axs[self._current_ax_v, self._current_ax_h].plot(
                 path[:][0], path[:][1], color='magenta', linewidth=2.5)
             im = self._axs[self._current_ax_v, self._current_ax_h].imshow(
                 colorsMap2d, interpolation='nearest')
-            self._axs[self._current_ax_v, self._current_ax_h].title.set_text(title_)
+            self._axs[self._current_ax_v,
+                      self._current_ax_h].title.set_text(title_)
             divider = make_axes_locatable(
                 self._axs[self._current_ax_v, self._current_ax_h])
             cax = divider.append_axes('right', size='5%', pad=0.05)
             self._fig.colorbar(im, cax=cax, orientation='vertical')
+            #add annotations
+            self._axs[self._current_ax_v, self._current_ax_h].annotate('', xy=self._start, xytext=(
+                self._start[0], self._start[1]-3), fontsize=20, arrowprops=dict(facecolor='lawngreen', arrowstyle='simple'))
+            self._axs[self._current_ax_v, self._current_ax_h].annotate('', xy=self._goal, xytext=(
+                self._goal[0], self._goal[1]-3), fontsize=20, arrowprops=dict(facecolor='gold', arrowstyle='simple'))
+            self._axs[self._current_ax_v, self._current_ax_h]
 
         # apply tight layout
         # self._fig.tight_layout()
@@ -400,7 +421,7 @@ class Simulation():
                             right=0.9,
                             top=0.9,
                             wspace=0.9,
-                            hspace=0.4)
+                            hspace=0.2)
 
         # update current axis
         if self._current_ax_h < self._plot_size[0]-1:
