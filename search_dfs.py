@@ -26,6 +26,12 @@ class SearchDFS(Search):
     # ====================
     # == override ==
     # ====================
+    def __str__(self):
+        return self.__class__.__name__
+
+    # ====================
+    # == override ==
+    # ====================
     def cost_function(self, graph, from_cell, to_cell) -> float:
         return graph.cost(from_cell, to_cell)
 
