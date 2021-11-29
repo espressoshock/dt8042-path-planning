@@ -22,7 +22,7 @@ def start_task1a(n_tests: int = 3, size_base: int = 40, size_d: int = 20):
         print(
             f'{Back.RED}{Fore.BLACK} Uninformed Search {Back.WHITE} {Style.RESET_ALL}\n')
         #random
-        sim = Simulation(SearchRandom())
+        sim = Simulation(SearchRandom(), n_plots=(3, 2))  # cols, rows
         size = random.randint(size_base, size_base+size_d)
         sim.generate_random_map(width=size, height=size)
         sim.start()
@@ -38,26 +38,36 @@ def start_task1a(n_tests: int = 3, size_base: int = 40, size_d: int = 20):
         sim.change_search(SearchGreedy())
         sim.start()
         #A* / Manhattan heuristic
-        sim.change_search(SearchAStar(heuristic=SearchAStar.Heuristics.MANHATTAN))
+        sim.change_search(SearchAStar(
+            heuristic=SearchAStar.Heuristics.MANHATTAN))
         sim.start()
         #A* / Euclidean heuristic
-        sim.change_search(SearchAStar(heuristic=SearchAStar.Heuristics.EUCLIDEAN))
+        sim.change_search(SearchAStar(
+            heuristic=SearchAStar.Heuristics.EUCLIDEAN))
         sim.start()
+        sim.show()
 
 
 def main():
     init()  # init colorama
-    start_task1a(n_tests=1)
-    # sim = Simulation(SearchRandom())
-    # sim.generate_random_map()
-    # sim.start() 
-
-    # sim = Simulation(SearchAStar(manhattan_heuristic=True, d=50))
-    # sim.generate_random_map_obstacles()
-    # sim.start()
-    # sim.change_search(SearchAStar(manhattan_heuristic=True, d=1))
-    # sim.start()
-
+    # start_task1a(n_tests=1)
+    sim = Simulation(SearchAStar(
+        heuristic=SearchAStar.Heuristics.MANHATTAN, d=1), n_plots=(5, 1))
+    sim.generate_random_map_obstacles()
+    sim.start()
+    sim.change_search(SearchAStar(
+        heuristic=SearchAStar.Heuristics.MANHATTAN, d=100))
+    sim.start()
+    sim.change_search(SearchAStar(
+        heuristic=SearchAStar.Heuristics.CUSTOM_1, d=1))
+    sim.start()
+    sim.change_search(SearchAStar(
+        heuristic=SearchAStar.Heuristics.CUSTOM_2, d=1))
+    sim.start()
+    sim.change_search(SearchAStar(
+        heuristic=SearchAStar.Heuristics.CUSTOM_3, d=1))
+    sim.start()
+    sim.show()
 
 
 if __name__ == '__main__':
