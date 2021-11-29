@@ -9,6 +9,7 @@ from graph import *
 from search import Search
 import math
 from enum import Enum
+from numpy import interp
 
 # Implementation following
 # suggested literature
@@ -24,7 +25,8 @@ class SearchAStar(Search):
         MANHATTAN = 0,
         EUCLIDEAN = 1,
         CUSTOM_1 = 2,
-        CUSTOM_2 = 3
+        CUSTOM_2 = 3,
+        CUSTOM_3 = 4
 
     #########################
     ### Constructor
@@ -35,6 +37,7 @@ class SearchAStar(Search):
         self._d = d
         self._aux_info = []
         self._start = None
+        self._goal = None
         pass
 
     # ====================
@@ -48,12 +51,14 @@ class SearchAStar(Search):
             base += ' [Heuristic: Custom 1]'
         elif self._heuristic is self.Heuristics.CUSTOM_2:
             base += ' [Heuristic: Custom 2]'
+        elif self._heuristic is self.Heuristics.CUSTOM_3:
+            base += ' [Heuristic: Custom 3]'
         else:
             base += ' [Heuristic: Manhattan]'
         return base + ' [D: '+str(self._d)+']'
 
     # ===============
-    # == heuristic ==
+    # == heuristics ==
     # ===============
     def _heuristic_manhattan(self, a: GridLocation, b: GridLocation) -> float:
         (x1, y1) = a
@@ -80,16 +85,96 @@ class SearchAStar(Search):
         dx = abs(x1 - x2)
         dy = abs(y1 - y2)
 
-        if self._start[1] >= mid_dy_ob:  # down
-            if y1 <= mid_dy_ob:
-                return 1 * (dx + dy)
-            else:
-                return 100 * (dx+dy)
-        else:  # up
-            if y1 >= mid_dy_ob:
-                return 1 * (dx + dy)
-            else:
-                return 100 * (dx+dy)
+        #don't overestimate, worst underestimate
+
+        if x1 < self._aux_info[2]:  # left
+            if self._start[1] > mid_dy_ob:  # downward
+                dy_end_obs = abs(self._aux_info[1]-y1)
+                dx_flip = abs(x1 - x2)
+                dy_end_goal = abs(y2 - self._aux_info[1])
+                return dy_end_obs + dx_flip + dy_end_goal
+            else:  # upward
+                dy_end_obs = abs(self._aux_info[0]-y1)
+                dx_flip = abs(x1 - x2)
+                dy_end_goal = abs(y2 - self._aux_info[0])
+                return dy_end_obs + dx_flip + dy_end_goal
+        else:  # right
+            return 1 * (dx + dy)
+
+    def _heuristic_custom2(self, a: GridLocation, b: GridLocation) -> float:
+        dy_ob = abs(self._aux_info[0] - self._aux_info[1])
+        mid_dy_ob = dy_ob/2
+
+        # print('info: ', dy_ob,  mid_dy_ob, self._start[1])
+
+        (x1, y1) = a
+        (x2, y2) = b  # goal
+        dx = abs(x1 - x2)
+        dy = abs(y1 - y2)
+        overestimate_correction = 0
+
+        if y1 > self._aux_info[0] and y1 < self._aux_info[1]:  # within
+            #decide direction
+            if self._start[1] >= mid_dy_ob:  # down
+                dy_end_trg = abs(
+                    self._aux_info[1]-y1)
+                return (dy_end_trg - overestimate_correction) * (dx+dy)
+            else:  # up
+                dy_end_trg = abs(
+                    self._aux_info[1]-y1)
+                return (dy_end_trg - overestimate_correction) * (dx+dy)
+        else:  # overshoot go right
+            if x1 < self._goal[0]:
+                dx_end_trg = abs(
+                    self._goal[0]-x1)
+                return (dx_end_trg - overestimate_correction) * (dx+dy)
+            else:  # overshoot to the right, go down
+                if self._goal[1] >= y1:  # down
+                    dy_end_trg = abs(
+                        self._goal[1]-y1)
+                    return (dy_end_trg - overestimate_correction) * (dx+dy)
+                else:  # up
+                    dy_end_trg = abs(
+                        self._goal[1]-y1)
+                    return (dy_end_trg - overestimate_correction) * (dx+dy)
+
+    def _heuristic_custom3(self, a: GridLocation, b: GridLocation) -> float:
+        dy_ob = abs(self._aux_info[0] - self._aux_info[1])
+        mid_dy_ob = dy_ob/2
+
+        # print('info: ', dy_ob,  mid_dy_ob, self._start[1])
+
+        (x1, y1) = a
+        (x2, y2) = b  # goal
+        dx = abs(x1 - x2)
+        dy = abs(y1 - y2)
+        overestimate_correction = 0
+        exact_heuristic = [60, 100]
+
+        if y1 > self._aux_info[0] and y1 < self._aux_info[1]:  # within
+            #decide direction
+            if self._start[1] >= mid_dy_ob:  # down
+                dy_end_trg = abs(
+                    self._aux_info[1]-y1)
+                return (interp(dy_end_trg, [0, dy_ob], exact_heuristic) - overestimate_correction) * (dx+dy)
+            else:  # up
+                dy_end_trg = abs(
+                    self._aux_info[1]-y1)
+                return (interp(dy_end_trg, [0, dy_ob], exact_heuristic) - overestimate_correction) * (dx+dy)
+        else:  # overshoot go right
+            if x1 < self._goal[0]:
+                dx_end_trg = abs(
+                    self._goal[0]-x1)
+                return (interp(dx_end_trg, [0, dy_ob], exact_heuristic) - overestimate_correction) * (dx+dy)
+            else:  # overshoot to the right, go down
+                if self._goal[1] >= y1:  # down
+                    dy_end_trg = abs(
+                        self._goal[1]-y1)
+                    return (interp(dy_end_trg, [0, dy_ob], exact_heuristic) - overestimate_correction) * (dx+dy)
+                else:  # up
+                    dy_end_trg = abs(
+                        self._goal[1]-y1)
+                    return (interp(dy_end_trg, [0, dy_ob], exact_heuristic) - overestimate_correction) * (dx+dy)
 
     def heuristic(self, a: GridLocation, b: GridLocation) -> float:
         if self._heuristic is self.Heuristics.EUCLIDEAN:
@@ -98,7 +183,9 @@ class SearchAStar(Search):
         elif self._heuristic is self.Heuristics.CUSTOM_1:
             return self._heuristic_custom1(a, b)
         elif self._heuristic is self.Heuristics.CUSTOM_2:
-            pass
+            return self._heuristic_custom2(a, b)
+        elif self._heuristic is self.Heuristics.CUSTOM_3:
+            return self._heuristic_custom3(a, b)
         else:
             return self._heuristic_manhattan(a, b)
 
@@ -115,6 +202,7 @@ class SearchAStar(Search):
         if aux_info != None and len(aux_info) > 0:
             self._aux_info = aux_info
             self._start = start
+            self._goal = goal
 
         frontier = PriorityQueue()
         frontier.put(start, 0)

@@ -31,7 +31,7 @@ class Simulation():
         self._start = None
         self._goal = None
         self._fig, self._axs = plt.subplots(
-            n_plots[1], n_plots[0], figsize=(10, 5))
+            n_plots[1], n_plots[0], figsize=(15, 5))
         self._plot_size = n_plots
         self._current_ax_h = 0
         self._current_ax_v = 0

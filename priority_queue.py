@@ -15,7 +15,7 @@ class PriorityQueue():
     ### Constructor
     #########################
     def __init__(self):
-        self.elements: List[Tuple[float, T]] = []
+        self.elements: list[tuple[float, any]] = []
 
     # ============
     # == DT fns ==
