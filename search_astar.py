@@ -33,6 +33,8 @@ class SearchAStar(Search):
         super().__init__()
         self._heuristic = heuristic
         self._d = d
+        self._aux_info = []
+        self._start = None
         pass
 
     # ====================
@@ -48,7 +50,7 @@ class SearchAStar(Search):
             base += ' [Heuristic: Custom 2]'
         else:
             base += ' [Heuristic: Manhattan]'
-        return base
+        return base + ' [D: '+str(self._d)+']'
 
     # ===============
     # == heuristic ==
@@ -67,12 +69,34 @@ class SearchAStar(Search):
         dy = abs(y1 - y2)
         return self._d * math.sqrt(dx * dx + dy * dy)
 
+    def _heuristic_custom1(self, a: GridLocation, b: GridLocation) -> float:
+        dy_ob = abs(self._aux_info[0] - self._aux_info[1])
+        mid_dy_ob = dy_ob/2
+
+        # print('info: ', dy_ob,  mid_dy_ob, self._start[1])
+
+        (x1, y1) = a
+        (x2, y2) = b  # goal
+        dx = abs(x1 - x2)
+        dy = abs(y1 - y2)
+
+        if self._start[1] >= mid_dy_ob:  # down
+            if y1 <= mid_dy_ob:
+                return 1 * (dx + dy)
+            else:
+                return 100 * (dx+dy)
+        else:  # up
+            if y1 >= mid_dy_ob:
+                return 1 * (dx + dy)
+            else:
+                return 100 * (dx+dy)
+
     def heuristic(self, a: GridLocation, b: GridLocation) -> float:
         if self._heuristic is self.Heuristics.EUCLIDEAN:
             # you shouldn't be using this on a grid with 4-way movements
             return self._heuristic_euclidean(a, b)
         elif self._heuristic is self.Heuristics.CUSTOM_1:
-            pass
+            return self._heuristic_custom1(a, b)
         elif self._heuristic is self.Heuristics.CUSTOM_2:
             pass
         else:
@@ -87,7 +111,11 @@ class SearchAStar(Search):
     # ==============
     # == override ==
     # ==============
-    def search(self, graph: Graph, start: Location, goal: Location) -> dict[Location, Optional[Location]]:
+    def search(self, graph: Graph, start: Location, goal: Location, aux_info: list = None) -> dict[Location, Optional[Location]]:
+        if aux_info != None and len(aux_info) > 0:
+            self._aux_info = aux_info
+            self._start = start
+
         frontier = PriorityQueue()
         frontier.put(start, 0)
         came_from: dict[Location, Optional[Location]] = {}
