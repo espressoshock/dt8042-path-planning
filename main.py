@@ -19,6 +19,7 @@ import random
 
 
 def start_task1a(n_tests: int = 3, size_base: int = 40, size_d: int = 20):
+    init() # init colorama
     for _ in range(n_tests):
         print(
             f'{Back.RED}{Fore.BLACK} Uninformed Search {Back.WHITE} {Style.RESET_ALL}\n')
@@ -110,17 +111,15 @@ def start_task1b_point3_bonus():
 
 
 def main():
-    init()  # init colorama
-
     # ================
     # == Start here ==
     # ================
     # uncomment below
     # ================
-    # start_task1a(n_tests=1)
+    start_task1a(n_tests=1)
     # start_task1b_point2(60, 0)
     # start_task1b_point3()
-    start_task1b_point3_bonus()  # bonus with pre-computed exact path
+    # start_task1b_point3_bonus()  # bonus with pre-computed exact path
 
 
 if __name__ == '__main__':
