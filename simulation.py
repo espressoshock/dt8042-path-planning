@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from graph import SquareGridGraph
 from search import Search
+from search_astar import SearchAStar
 from search_bfs import SearchBFS
 from colorama import Fore, Back, Style, init
 import copy
@@ -103,7 +104,7 @@ class Simulation():
         if plot_in is None:
             plot_in = (self._current_ax_h, self._current_ax_h)
 
-        if len(self._aux_info) > 0:
+        if len(self._aux_info) > 0 and isinstance(self._search, SearchAStar):
             path, costs = self._search.search(
                 self._graph, self._start, self._goal, self._aux_info)
         else:

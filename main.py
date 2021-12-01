@@ -3,6 +3,7 @@
 ##############################
 
 # =Imports
+from search import Search
 from search_random import SearchRandom
 from search_bfs import SearchBFS
 from search_dfs import SearchDFS
@@ -48,11 +49,49 @@ def start_task1a(n_tests: int = 3, size_base: int = 40, size_d: int = 20):
         sim.show()
 
 
-def main():
-    init()  # init colorama
-    # start_task1a(n_tests=1)
+def start_task1b_point2(size_base: int = 40, size_d: int = 20):
+    sim = Simulation(SearchRandom(), n_plots=(3, 2))
+    size = random.randint(size_base, size_base+size_d)
+    sim.generate_random_map_obstacles(size, size)
+    sim.start()
+    sim.change_search(SearchBFS())
+    sim.start()
+    sim.change_search(SearchDFS())
+    sim.start()
+    sim.change_search(SearchGreedy())
+    sim.start()
+    sim.change_search(SearchAStar(
+        heuristic=SearchAStar.Heuristics.EUCLIDEAN, d=1))
+    sim.start()
+    sim.change_search(SearchAStar(
+        heuristic=SearchAStar.Heuristics.MANHATTAN, d=1))
+    sim.start()
+    sim.show()
+
+
+def start_task1b_point3():
     sim = Simulation(SearchAStar(
-        heuristic=SearchAStar.Heuristics.MANHATTAN, d=1), n_plots=(5, 1))
+        heuristic=SearchAStar.Heuristics.MANHATTAN, d=1), n_plots=(2, 2))
+    sim.generate_random_map_obstacles()
+    sim.start()
+    sim.change_search(SearchAStar(
+        heuristic=SearchAStar.Heuristics.EUCLIDEAN, d=1))
+    sim.start()
+    # sim.change_search(SearchAStar(
+    #     heuristic=SearchAStar.Heuristics.MANHATTAN, d=100))
+    # sim.start()
+    sim.change_search(SearchAStar(
+        heuristic=SearchAStar.Heuristics.CUSTOM_1, d=1))
+    sim.start()
+    sim.change_search(SearchAStar(
+        heuristic=SearchAStar.Heuristics.CUSTOM_2, d=1))
+    sim.start()
+    sim.show()
+
+
+def start_task1b_point3_bonus():
+    sim = Simulation(SearchAStar(
+        heuristic=SearchAStar.Heuristics.MANHATTAN, d=1), n_plots=(2, 3))
     sim.generate_random_map_obstacles()
     sim.start()
     sim.change_search(SearchAStar(
@@ -68,6 +107,20 @@ def main():
         heuristic=SearchAStar.Heuristics.CUSTOM_3, d=1))
     sim.start()
     sim.show()
+
+
+def main():
+    init()  # init colorama
+
+    # ================
+    # == Start here ==
+    # ================
+    # uncomment below
+    # ================
+    # start_task1a(n_tests=1)
+    # start_task1b_point2(60, 0)
+    # start_task1b_point3()
+    start_task1b_point3_bonus()  # bonus with pre-computed exact path
 
 
 if __name__ == '__main__':

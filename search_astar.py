@@ -57,9 +57,9 @@ class SearchAStar(Search):
             base += ' [Heuristic: Manhattan]'
         return base + ' [D: '+str(self._d)+']'
 
-    # ===============
+    # ================
     # == heuristics ==
-    # ===============
+    # ================
     def _heuristic_manhattan(self, a: GridLocation, b: GridLocation) -> float:
         (x1, y1) = a
         (x2, y2) = b  # goal
@@ -77,8 +77,6 @@ class SearchAStar(Search):
     def _heuristic_custom1(self, a: GridLocation, b: GridLocation) -> float:
         dy_ob = abs(self._aux_info[0] - self._aux_info[1])
         mid_dy_ob = dy_ob/2
-
-        # print('info: ', dy_ob,  mid_dy_ob, self._start[1])
 
         (x1, y1) = a
         (x2, y2) = b  # goal
@@ -105,7 +103,6 @@ class SearchAStar(Search):
         dy_ob = abs(self._aux_info[0] - self._aux_info[1])
         mid_dy_ob = dy_ob/2
 
-        # print('info: ', dy_ob,  mid_dy_ob, self._start[1])
 
         (x1, y1) = a
         (x2, y2) = b  # goal
@@ -149,7 +146,7 @@ class SearchAStar(Search):
         dx = abs(x1 - x2)
         dy = abs(y1 - y2)
         overestimate_correction = 0
-        exact_heuristic = [60, 100]
+        exact_heuristic = [1, 5]
 
         if y1 > self._aux_info[0] and y1 < self._aux_info[1]:  # within
             #decide direction
