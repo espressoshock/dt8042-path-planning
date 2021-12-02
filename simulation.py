@@ -12,6 +12,7 @@ from search_bfs import SearchBFS
 from colorama import Fore, Back, Style, init
 import copy
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.lines import Line2D
 
 
 class Simulation():
@@ -114,11 +115,6 @@ class Simulation():
         self.merge_expanded_nodes(costs)
         figure, ax = self.plot_map(self._2dmap_solved, path, title_=('' +
                                    str(self._search)), plot_in=plot_in)
-        # ax.annotate('', xy=self._start, xytext=(
-        #     self._start[0], self._start[1]-3), fontsize=12, arrowprops=dict(facecolor='lawngreen', arrowstyle='simple'))
-        # ax.annotate('', xy=self._goal, xytext=(
-        #     self._goal[0], self._goal[1]-3), fontsize=12, arrowprops=dict(facecolor='gold', arrowstyle='simple'))
-        # self.show()
         self.clear_map()
 
     #########################
@@ -380,11 +376,23 @@ class Simulation():
         # print('path: ', path_)
         path = np.array(list(path_)).T.tolist()
 
+        # ===================
+        # == Custom Legend ==
+        # ===================
+        legend_items = [Line2D([0], [0], color='magenta', lw=2, label='S-Path'),
+                        Line2D([0], [0], marker='v', color=(0.0, 1.0, 0.0, 0), label='Start', markerfacecolor=(
+                            0.0, 1.0, 0.0, 1.0), markersize=6),
+                        Line2D([0], [0], marker='v', color=(1.0, 0.7, 0.27, 0), label='Goal', markerfacecolor=(
+                            1.0, 0.7, 0.27, 1.0), markersize=6),
+                        Line2D([0], [0], marker='s', color=(1.0, 0, 0, 0), label='Obstacle', markerfacecolor=(1.0, 0, 0, 1), markersize=6)]
+
         # fig = plt.figure()
         # ax = fig.add_subplot(111)
         if self._plot_size[1] <= 1:
             self._axs[self._current_ax_h].plot(
-                path[:][0], path[:][1], color='magenta', linewidth=2.5)
+                path[:][0], path[:][1], color='magenta', linewidth=2.5, label='path')
+            self._axs[self._current_ax_h].legend(
+                handles=legend_items, loc='upper left', prop={'size': 6})
             im = self._axs[self._current_ax_h].imshow(
                 colorsMap2d, interpolation='nearest')
             self._axs[self._current_ax_h].title.set_text(title_)
@@ -398,7 +406,9 @@ class Simulation():
                 self._goal[0], self._goal[1]-3), fontsize=20, arrowprops=dict(facecolor='gold', arrowstyle='simple'))
         else:
             self._axs[self._current_ax_v, self._current_ax_h].plot(
-                path[:][0], path[:][1], color='magenta', linewidth=2.5)
+                path[:][0], path[:][1], color='magenta', linewidth=2.5, label='path')
+            self._axs[self._current_ax_v, self._current_ax_h].legend(
+                handles=legend_items, loc='upper left', prop={'size': 6})
             im = self._axs[self._current_ax_v, self._current_ax_h].imshow(
                 colorsMap2d, interpolation='nearest')
             self._axs[self._current_ax_v,
