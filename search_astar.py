@@ -46,7 +46,7 @@ class SearchAStar(Search):
     def __str__(self):
         base = 'SearchA*'
         if self._heuristic is self.Heuristics.EUCLIDEAN:
-            base += ' [Heuristic: Euclidean]'
+            base += ' [Heuristic: Euclidean]'+' [D: '+str(self._d)+']'
         elif self._heuristic is self.Heuristics.CUSTOM_1:
             base += ' [Heuristic: Custom 1]'
         elif self._heuristic is self.Heuristics.CUSTOM_2:
@@ -54,8 +54,8 @@ class SearchAStar(Search):
         elif self._heuristic is self.Heuristics.CUSTOM_3:
             base += ' [Heuristic: Custom 3]'
         else:
-            base += ' [Heuristic: Manhattan]'
-        return base + ' [D: '+str(self._d)+']'
+            base += ' [Heuristic: Manhattan]' + ' [D: '+str(self._d)+']'
+        return base
 
     # ================
     # == heuristics ==
@@ -102,7 +102,6 @@ class SearchAStar(Search):
     def _heuristic_custom2(self, a: GridLocation, b: GridLocation) -> float:
         dy_ob = abs(self._aux_info[0] - self._aux_info[1])
         mid_dy_ob = dy_ob/2
-
 
         (x1, y1) = a
         (x2, y2) = b  # goal
