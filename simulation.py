@@ -101,7 +101,7 @@ class Simulation():
     # =======================
     # == 5. Perform search ==
     # =======================
-    def start(self, plot_in: tuple[int, int] = None):
+    def start(self, plot_in: tuple[int, int] = None, generate_stats: bool = True):
         if plot_in is None:
             plot_in = (self._current_ax_h, self._current_ax_h)
 
@@ -111,11 +111,13 @@ class Simulation():
         else:
             path, costs = self._search.search(
                 self._graph, self._start, self._goal)
-        self.generate_statistics(path, costs, True)
         self.merge_expanded_nodes(costs)
-        figure, ax = self.plot_map(self._2dmap_solved, path, title_=('' +
-                                   str(self._search)), plot_in=plot_in)
+        if generate_stats:
+            self.generate_statistics(path, costs, True)
+            figure, ax = self.plot_map(self._2dmap_solved, path, title_=('' +
+                                                                         str(self._search)), plot_in=plot_in)
         self.clear_map()
+        return path, costs
 
     #########################
     # Built-in Test
@@ -306,9 +308,9 @@ class Simulation():
         plt.imshow(plot)
         plt.show()
 
-    def show(self):
+    def show(self, cut: bool = False):
         # remove unused subplot
-        if self._plot_size[0] % 2 != 0 or self._plot_size[1] % 2 != 0:
+        if cut:
             self._fig.delaxes(self._axs.flat[-1])
         plt.show()
 
