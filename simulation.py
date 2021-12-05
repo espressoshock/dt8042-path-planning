@@ -307,6 +307,9 @@ class Simulation():
         plt.show()
 
     def show(self):
+        # remove unused subplot
+        if self._plot_size[0] % 2 != 0 or self._plot_size[1] % 2 != 0:
+            self._fig.delaxes(self._axs.flat[-1])
         plt.show()
 
     # helper function for plotting the result
@@ -392,7 +395,7 @@ class Simulation():
             self._axs[self._current_ax_h].plot(
                 path[:][0], path[:][1], color='magenta', linewidth=2.5, label='path')
             self._axs[self._current_ax_h].legend(
-                handles=legend_items, loc='upper left', prop={'size': 6})
+                handles=legend_items, loc='upper left', prop={'size': 8})
             im = self._axs[self._current_ax_h].imshow(
                 colorsMap2d, interpolation='nearest')
             self._axs[self._current_ax_h].title.set_text(title_)
@@ -408,7 +411,7 @@ class Simulation():
             self._axs[self._current_ax_v, self._current_ax_h].plot(
                 path[:][0], path[:][1], color='magenta', linewidth=2.5, label='path')
             self._axs[self._current_ax_v, self._current_ax_h].legend(
-                handles=legend_items, loc='upper left', prop={'size': 6})
+                handles=legend_items, loc='upper left', prop={'size': 8})
             im = self._axs[self._current_ax_v, self._current_ax_h].imshow(
                 colorsMap2d, interpolation='nearest')
             self._axs[self._current_ax_v,
